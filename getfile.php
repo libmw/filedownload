@@ -1,7 +1,7 @@
 ﻿<?php
 /**
  * @desc抓取远程图片
- * 
+ * @ok
  * @param string $url 远程图片路径
  * @param string $filename 本地存储文件名
  */
