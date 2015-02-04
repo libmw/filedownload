@@ -1,98 +1,103 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head xmlns="http://www.w3.org/1999/html">
-<meta http-equiv="Content-Type" content="text/html; charset=gbk" />
-<title>url下载</title>
-<script type="text/javascript" src="./core_dom_mall.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=gbk" />
+    <title>url下载</title>
+    <script type="text/javascript" src="./core_dom_mall.js"></script>
 </head>
 <body>
-    <form id="post_form" action="./getremotefile.php" method="post">
-		<fieldset>
-			<legend>url下载</legend>
-			<p>URL列表：<textarea id="urls" name="url"></textarea></p>
-            <p>html内容（填写了此项则忽略URL列表）：<textarea name="content" cols="100" rows="20" /></textarea></p>
-			<p>文件类型：<input id="filetype" name="type" value="rar|zip|im" /></p>
+<form id="post_form" action="./getremotefile.php" method="post">
+    <fieldset>
+        <legend>url下载</legend>
+        <p>URL列表：<textarea id="urls" name="url" cols="100" rows="20"
+                           placeholder="输入一个网页的地址，将从这个网页的源代码里抓取符合文件类型的文件，多个地址用|分开。
+                           如要下载百度首页的所有png图片，这里就填写http://www.baidu.com/,
+                           下面的文件内容填写png，html内容不填写"></textarea></p>
+        <p>html内容（填写了此项则忽略URL列表）：
+            <textarea name="content" cols="100" rows="20"  placeholder="输入一段html，
+            将从这段html里抓取符合文件类型的文件，如直接填写http://su.bdimg.com/static/superplus/img/spis7_f80cc562.png" /></textarea></p>
+        <p>文件类型：<input id="filetype" name="type" value="rar|zip|im" /></p>
 
-			<p>
-				<input id="submit" type="button" value="开始" />
-				<input id="pause" onclick="pauseStatus=pauseStatus?false:true;" type="button" value="暂停" />
-			</p>
-			<div>日志：<div id="log"></div></div>
-		</fieldset>
-    </form>
+        <p>
+            <input id="submit" type="button" value="开始" />
+            <input id="pause" onclick="pauseStatus=pauseStatus?false:true;" type="button" value="暂停" />
+        </p>
+        <div>日志：<div id="log"></div></div>
+    </fieldset>
+</form>
 <script>
-	var pauseStatus = false
-		,errFiles = []; //错误文件列表
-	var Log = {
-		add: function(log){
-			var p = document.createElement('p');
-			p.innerHTML = log;
-			$('log').appendChild(p);
-		}
-	}
-	var urlLists//url列表
-	,types; //支持文件类型
-	function downLoad(){
-		if(pauseStatus){
-			setTimeout(downLoad, 5000);
-			return;
-		}
-		if(!urlLists.length){
-			Log.add('所有任务完成！');
-			if(errFiles.length){
-				Log.add('错误文件：'+errFiles.join('<br />'));
-			}
-			return;
-		}
-		var url = urlLists.shift();
-		Log.add('<hr />正在处理'+url+'，还剩'+urlLists.length+'个url待处理。');
-		Ajax.post( $('post_form'),function(res){
-			var r = Ajax.opResults(res, false);
-			if(!r){
-				Log.add('在'+url+'里没有发现任何格式为'+types+'的文件');
-				downLoad();
-				return;
-			}
-			var fileList = r.split('|');
-			function downFile(){
-				if(pauseStatus){
-					setTimeout(downFile, 5000);
-					return;
-				}
-				if(!fileList.length){//本次文件列表全部下载完成
-					downLoad();
-					return;
-				}
-				file = fileList.shift();
-				Log.add('正在下载文件:'+file+'，还剩'+fileList.length+'个文件待处理');
-				Ajax.get('./getfile.php',{url:file,type:types},function(res){
-					if(res == 'success'){
-						Log.add('成功下载文件:'+file);
-					}else{
-						errFiles.push(file);
-						Log.add('下载'+file+'出错，返回：'+res.slice(0,100));
-					}
-					downFile();
-				});
-			}
-			downFile();
-		});
-	}
+    var pauseStatus = false
+            ,errFiles = []; //错误文件列表
+    var Log = {
+        add: function(log){
+            var p = document.createElement('p');
+            p.innerHTML = log;
+            $('log').appendChild(p);
+        }
+    }
+    var urlLists//url列表
+            ,types; //支持文件类型
+    function downLoad(){
+        if(pauseStatus){
+            setTimeout(downLoad, 5000);
+            return;
+        }
+        if(!urlLists.length){
+            Log.add('所有任务完成！');
+            if(errFiles.length){
+                Log.add('错误文件：'+errFiles.join('<br />'));
+            }
+            return;
+        }
+        var url = urlLists.shift();
+        Log.add('<hr />正在处理'+url+'，还剩'+urlLists.length+'个url待处理。');
+        Ajax.post( $('post_form'),function(res){
+            var r = Ajax.opResults(res, false);
+            if(!r){
+                Log.add('在'+url+'里没有发现任何格式为'+types+'的文件');
+                downLoad();
+                return;
+            }
+            var fileList = r.split('|');
+            function downFile(){
+                if(pauseStatus){
+                    setTimeout(downFile, 5000);
+                    return;
+                }
+                if(!fileList.length){//本次文件列表全部下载完成
+                    downLoad();
+                    return;
+                }
+                file = fileList.shift();
+                Log.add('正在下载文件:'+file+'，还剩'+fileList.length+'个文件待处理');
+                Ajax.get('./getfile.php',{url:file,type:types},function(res){
+                    if(res == 'success'){
+                        Log.add('成功下载文件:'+file);
+                    }else{
+                        errFiles.push(file);
+                        Log.add('下载'+file+'出错，返回：'+res.slice(0,100));
+                    }
+                    downFile();
+                });
+            }
+            downFile();
+        });
+    }
 
-	W('#submit').click(function(e){
-		urlLists = ArrayH.unique($('urls').value.split('|'));
-		types = $('filetype').value;
-		console.log(urlLists,types)
-		downLoad();		
-	});
-	
-	var ret = [];
-Array.prototype.forEach.call(document.getElementsByTagName('a'),function(o,i){
-	if(o.href.indexOf('./2012/') > -1){
-		ret.push(o.href)
-	}
-});
-ret = ArrayH.unique(ret);
-ret.join('|')
+    W('#submit').click(function(e){
+        urlLists = ArrayH.unique($('urls').value.split('|'));
+        types = $('filetype').value;
+        console.log(urlLists,types)
+        downLoad();
+    });
+
+    var ret = [];
+    Array.prototype.forEach.call(document.getElementsByTagName('a'),function(o,i){
+        if(o.href.indexOf('./2012/') > -1){
+            ret.push(o.href)
+        }
+    });
+    ret = ArrayH.unique(ret);
+    ret.join('|')
 </script>
- </body>
-  </html>
+</body>
+</html>

@@ -6,8 +6,15 @@
  * @param string $filename 本地存储文件名
  */
 function grabImage($url, $type = '') {
+
     if($url == '') {
         return false; //如果 $url 为空则返回 false;
+    }
+    if(strpos($url, 'http') === false){
+        if(strpos($url, '//') === false){
+            $url = '//' . $url;
+        }
+        $url = 'http:' . $url;
     }
     $ext_name = strrchr($url, '.'); //获取图片的扩展名
     //if($ext_name != '.gif' && $ext_name != '.jpg' && $ext_name != '.bmp' && $ext_name != '.png') {
@@ -19,6 +26,8 @@ function grabImage($url, $type = '') {
         preg_match('/([^\/]+?\.(?:'.$type.'))$/', $url, $vars);
         $filename = $vars[0]; //
     }
+    echo $url;
+    echo $filename;
     //代理
     $ctx = stream_context_create(array(
         'http' => array('timeout' => 5,

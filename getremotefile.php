@@ -16,7 +16,8 @@
 	}
 	//End  
 	function get_formart_file($html, $type){
-		preg_match_all('/href\s*=\s*"([^\=\"]*\.(?:'.$type.'))/', $html, $vars);
+		preg_match_all('/((?:http|https)?[^\=\"]*\.(?:'.$type.'))/', $html, $vars);
+        //var_dump($vars[1]);
 		echo implode( '|', array_unique( $vars[1])); 
 	}
 	$url = $_POST['url'];
